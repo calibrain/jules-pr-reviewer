@@ -117,13 +117,7 @@ async function run(): Promise<void> {
       owner,
       repo,
       prNumber,
-      {
-        action: ctx.payload.action,
-        before: ctx.payload.before,
-        diffMode: config.diffMode,
-        baseSha,
-        headSha,
-      },
+      { baseSha, headSha },
       {
         ignoredPaths: config.ignoredPaths,
         rulesFilePath: config.rulesFilePath,

@@ -40513,18 +40513,11 @@ async function loadPerPathRules(octokit, owner, repo, rulesDir, baseSha, changed
 
 
 async function prepareReview(octokit, owner, repo, prNumber, scope, config) {
-    const isIncremental = scope.diffMode === "prompt" &&
-        scope.action === "synchronize" &&
-        Boolean(scope.before);
-    const diffBaseSha = isIncremental && scope.before ? scope.before : scope.baseSha;
-    if (isIncremental) {
-        info(`Synchronize event detected. Reviewing incremental changes from ${diffBaseSha} to ${scope.headSha}`);
-    }
-    else {
-        info(`Reviewing full PR diff from ${diffBaseSha} to ${scope.headSha}`);
-    }
+    // Always the whole PR diff, even on synchronize: before...head after a merge
+    // or rebase from the base branch holds the base's commits, not the PR's.
+    info(`Reviewing full PR diff from ${scope.baseSha} to ${scope.headSha}`);
     const [diff, rulesFromFile, openThreads] = await Promise.all([
-        fetchDiff(octokit, owner, repo, { number: prNumber }, diffBaseSha, scope.headSha),
+        fetchDiff(octokit, owner, repo, { number: prNumber }, scope.baseSha, scope.headSha),
         config.rulesFilePath
             ? loadRulesFromBase(octokit, owner, repo, config.rulesFilePath, scope.baseSha)
             : Promise.resolve(undefined),
@@ -46281,13 +46274,7 @@ async function run() {
             throw wrapPermissionError(err, "checks:write", "createCheckRun");
         }
         // ⚡ Bolt: Execute independent GitHub API calls concurrently to reduce overall latency
-        const preparedDiff = await prepareReview(octokit, owner, repo, prNumber, {
-            action: ctx.payload.action,
-            before: ctx.payload.before,
-            diffMode: config.diffMode,
-            baseSha,
-            headSha,
-        }, {
+        const preparedDiff = await prepareReview(octokit, owner, repo, prNumber, { baseSha, headSha }, {
             ignoredPaths: config.ignoredPaths,
             rulesFilePath: config.rulesFilePath,
             rulesDirectory: config.rulesDirectory,
