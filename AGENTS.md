@@ -127,7 +127,6 @@ Agents that do not natively consume these definitions should still mirror this s
 ## Key Design Decisions
 
 - **Prompt-injection defence:** The review prompt in [`prompt.ts`](./src/prompt.ts) explicitly labels PR title, description, diff, and rules file as `UNTRUSTED` to prevent the reviewed code from manipulating the LLM verdict.
-- **`pull_request_target` is blocked:** The action refuses to run on `pull_request_target` to avoid token-scope escalation from fork PRs.
 - **Incremental diffs:** On `synchronize` events the action diffs only the new commits (`payload.before → head.sha`) instead of the full PR diff.
 - **Thread resolution:** The LLM can mark previous review comments as resolved by index, and the action resolves the corresponding GitHub review threads via GraphQL.
 

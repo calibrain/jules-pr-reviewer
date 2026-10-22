@@ -445,7 +445,7 @@ Then run: `JULES_API_KEY=... node list-sources.mjs`
 
 ## Security
 
-- **Only `pull_request` is supported.** `pull_request_target` is rejected — it runs with base-repo write tokens, and exposes the action to prompt-injection via attacker-controlled diffs.
+- **Both `pull_request` and `pull_request_target` are supported.** Be careful using `pull_request_target` as it runs with base-repo write tokens and exposes the action to prompt-injection via attacker-controlled diffs, unless you know what you are doing.
 - **Fork PRs are skipped by default** (`skip_forks: true`). An untrusted fork's diff/PR description can contain prompt-injection payloads.
 - **`rules_file` and `rules_directory` are loaded from the base SHA**, not the PR head. An attacker cannot change the review rules by editing them in their PR.
 - **All untrusted content is fenced** in the prompt as "UNTRUSTED" with explicit instructions to Jules.
