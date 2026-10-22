@@ -262,16 +262,13 @@ describe("index.ts", () => {
     expect(mockJulesHelper.promptSession).toHaveBeenCalled();
   });
 
-  it("fails if eventName is pull_request_target", async () => {
+  it("runs if eventName is pull_request_target", async () => {
     (github as any).context.eventName = "pull_request_target";
     await loadIndex();
-    expect(mockSetFailed).toHaveBeenCalledWith(
-      expect.stringContaining("pull_request_target is not supported")
-    );
-    expect(mockGithubHelper.createCheckRun).not.toHaveBeenCalled();
+    expect(mockGithubHelper.createCheckRun).toHaveBeenCalled();
   });
 
-  it("fails if eventName is not pull_request", async () => {
+  it("fails if eventName is not pull_request or pull_request_target", async () => {
     (github as any).context.eventName = "push";
     await loadIndex();
     expect(mockSetFailed).toHaveBeenCalledWith(

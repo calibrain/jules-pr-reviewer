@@ -12,10 +12,9 @@ The action sends PR diffs, titles, descriptions, and a repo rules file to an LLM
 ## Decision
 Multi-layered defense:
 1. The prompt (src/prompt.ts) explicitly labels PR title, description, diff, and rules file as `UNTRUSTED` with a `# SECURITY — READ FIRST` section instructing the LLM to ignore instructions in untrusted sections.
-2. The action refuses to run on `pull_request_target` events (throws a hard error).
-3. Forks are skipped by default (`skip_forks: true`).
-4. The rules file is loaded from the base SHA (not head SHA), preventing PR authors from modifying review rules.
-5. A `bypass_label` allows human reviewers to skip the AI review entirely.
+2. Forks are skipped by default (`skip_forks: true`).
+3. The rules file is loaded from the base SHA (not head SHA), preventing PR authors from modifying review rules.
+4. A `bypass_label` allows human reviewers to skip the AI review entirely.
 
 ## Alternatives Considered
 
@@ -37,5 +36,4 @@ Multi-layered defense:
 ## Consequences
 - The security section in the prompt is critical and must be preserved during any prompt refactoring
 - Fork PRs don't get reviewed (acceptable trade-off for security)
-- The `pull_request_target` block means users must use `pull_request` event type
 - Any new fields added to the prompt must be labeled as `UNTRUSTED` if they originate from the PR

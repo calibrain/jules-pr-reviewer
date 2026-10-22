@@ -55,15 +55,12 @@ async function run(): Promise<void> {
   const config = configResult.config;
 
   const ctx = github.context;
-  if (ctx.eventName === "pull_request_target") {
+  if (
+    ctx.eventName !== "pull_request" &&
+    ctx.eventName !== "pull_request_target"
+  ) {
     failWithConfigError(
-      "pull_request_target is not supported — it runs with base-repo write tokens and exposes the action to prompt-injection via attacker-controlled diffs. Use on: pull_request instead."
-    );
-    return;
-  }
-  if (ctx.eventName !== "pull_request") {
-    failWithConfigError(
-      `Unsupported event: ${ctx.eventName}. Use on: pull_request.`
+      `Unsupported event: ${ctx.eventName}. Use on: pull_request or pull_request_target.`
     );
     return;
   }
