@@ -46240,12 +46240,9 @@ async function run() {
     }
     const config = configResult.config;
     const ctx = github_context;
-    if (ctx.eventName === "pull_request_target") {
-        failWithConfigError("pull_request_target is not supported — it runs with base-repo write tokens and exposes the action to prompt-injection via attacker-controlled diffs. Use on: pull_request instead.");
-        return;
-    }
-    if (ctx.eventName !== "pull_request") {
-        failWithConfigError(`Unsupported event: ${ctx.eventName}. Use on: pull_request.`);
+    if (ctx.eventName !== "pull_request" &&
+        ctx.eventName !== "pull_request_target") {
+        failWithConfigError(`Unsupported event: ${ctx.eventName}. Use on: pull_request or pull_request_target.`);
         return;
     }
     const pr = ctx.payload.pull_request;
