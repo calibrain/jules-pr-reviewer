@@ -9,7 +9,7 @@ _Special thanks to [@sanjay3290](https://github.com/sanjay3290) for the original
 - Extensible: layer your own rules from the workflow or from a file in the repo.
 - **Line-level Comments**: Posts findings directly on the specific lines of code in the PR.
 - **Auto-resolves threads**: Automatically resolves its own comments if you fix the issue and push a new commit.
-- **Incremental reviews**: Only reviews the new changes between pushes (on `synchronize` events) to save time and tokens.
+- **Full-PR reviews**: Every run, including on `synchronize`, reviews the whole PR diff, so merging or rebasing the base branch into a PR never swaps the PR's changes for the base's.
 - **Deduplicates findings**: Never re-reports its own still-open comments on subsequent pushes (disable with `dedupe: false`).
 
 ## What a review looks like
@@ -420,11 +420,11 @@ Notes:
 
 ## Inner Workings & Architecture
 
-Behind the scenes, this action works by compiling a prompt combining the PR details, the incremental or full diff, your custom instructions, and a strict JSON schema requirement.
+Behind the scenes, this action works by compiling a prompt combining the PR details, the full PR diff, your custom instructions, and a strict JSON schema requirement.
 
-- **Incremental Diffing**: On `synchronize` events, the action only pulls the diff between the previous state and the new state, rather than fetching the entire PR diff. This prevents repeating comments on untouched code and speeds up the review process.
+- **Full PR Diff**: Every run reviews the PR's own changes (`base...head`, what the PR's Files tab shows). An earlier version reviewed only `before...head` on `synchronize`, which after merging the base branch into the PR was the base's commits instead of the PR's (see ADR-004).
 - **Auto-Resolving Threads**: The action fetches open PR review threads and includes them in the prompt. If Jules determines that a new commit fixes the issue raised in a comment, it signals the action to automatically mark the GitHub conversation thread as **resolved**.
-- **Findings Deduplication**: When `dedupe` is on (default), the prompt also tells Jules not to re-report its own still-open findings as new comments — identical issues don't re-surface across pushes or runs. It can only re-report when the new diff introduces a materially different instance of a problem. Combined with incremental diffing, already-reviewed code stays quiet. Set `dedupe: false` if you want each push fully re-reviewed.
+- **Findings Deduplication**: When `dedupe` is on (default), the prompt also tells Jules not to re-report its own still-open findings as new comments — identical issues don't re-surface across pushes or runs. It can only re-report when the new diff introduces a materially different instance of a problem. Set `dedupe: false` if you want each push fully re-reviewed.
 - **JSON Parsing**: By enforcing a strict JSON output from Jules, the action can decouple the language generation from the GitHub API calls, easily formatting individual line comments for `octokit.rest.pulls.createReview`.
 - **Review delivery state**: `submitReview` reports what GitHub actually accepted — inline findings with suggestions, inline findings without suggestions, or a summary only. If a fallback drops suggestions or inline comments, the posted review body, the check-run summary, and the `review_submitted` / `review_completed` structured logs all disclose the degraded delivery. The verdict, finding counts, configured gate, and check-run annotations are unchanged.
 

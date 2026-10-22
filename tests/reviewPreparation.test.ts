@@ -48,86 +48,43 @@ describe("prepareReview", () => {
     mockLoadPerPathRules.mockResolvedValue([]);
   });
 
-  it.each([
-    {
-      action: "opened",
-      before: "beforeSHA",
-      diffMode: "prompt",
-      expected: "baseSHA",
-    },
-    {
-      action: "synchronize",
-      before: "beforeSHA",
-      diffMode: "prompt",
-      expected: "beforeSHA",
-    },
-    {
-      action: "synchronize",
-      before: "baseSHA",
-      diffMode: "prompt",
-      expected: "baseSHA",
-      incremental: true,
-    },
-    {
-      action: "synchronize",
-      before: undefined,
-      diffMode: "prompt",
-      expected: "baseSHA",
-    },
-    {
-      action: "synchronize",
-      before: "beforeSHA",
-      diffMode: "agentic",
-      expected: "baseSHA",
-    },
-    {
-      action: "opened",
-      before: "beforeSHA",
-      diffMode: "agentic",
-      expected: "baseSHA",
-    },
-  ] as const)(
-    "prepares $diffMode review for $action with previous SHA $before from $expected",
-    async ({ action, before, diffMode, expected, incremental }) => {
-      await prepareReview(
-        octokit,
-        "owner",
-        "repo",
-        1,
-        { action, before, diffMode, baseSha: "baseSHA", headSha: "headSHA" },
-        { ...baseConfig, rulesFilePath: "rules.md", rulesDirectory: "rules" }
-      );
+  it("reviews the full PR diff and loads rules from the base SHA", async () => {
+    await prepareReview(
+      octokit,
+      "owner",
+      "repo",
+      1,
+      { baseSha: "baseSHA", headSha: "headSHA" },
+      { ...baseConfig, rulesFilePath: "rules.md", rulesDirectory: "rules" }
+    );
 
-      expect(mockFetchDiff).toHaveBeenCalledWith(
-        octokit,
-        "owner",
-        "repo",
-        { number: 1 },
-        expected,
-        "headSHA"
-      );
-      expect(mockLoadRulesFromBase).toHaveBeenCalledWith(
-        octokit,
-        "owner",
-        "repo",
-        "rules.md",
-        "baseSHA"
-      );
-      expect(mockLoadPerPathRules).toHaveBeenCalledWith(
-        octokit,
-        "owner",
-        "repo",
-        "rules",
-        "baseSHA",
-        ["src/a.ts"]
-      );
-      expect(core.info).toHaveBeenCalledWith(
-        expected === "beforeSHA" || incremental
-          ? `Synchronize event detected. Reviewing incremental changes from ${expected} to headSHA`
-          : "Reviewing full PR diff from baseSHA to headSHA"
-      );
-    }
-  );
+    expect(mockFetchDiff).toHaveBeenCalledWith(
+      octokit,
+      "owner",
+      "repo",
+      { number: 1 },
+      "baseSHA",
+      "headSHA"
+    );
+    expect(mockLoadRulesFromBase).toHaveBeenCalledWith(
+      octokit,
+      "owner",
+      "repo",
+      "rules.md",
+      "baseSHA"
+    );
+    expect(mockLoadPerPathRules).toHaveBeenCalledWith(
+      octokit,
+      "owner",
+      "repo",
+      "rules",
+      "baseSHA",
+      ["src/a.ts"]
+    );
+    expect(core.info).toHaveBeenCalledWith(
+      "Reviewing full PR diff from baseSHA to headSHA"
+    );
+  });
 
   it("fetches, filters, and extracts changed files", async () => {
     const result = await prepareReview(
@@ -136,8 +93,6 @@ describe("prepareReview", () => {
       "repo",
       1,
       {
-        action: "opened",
-        diffMode: "prompt",
         baseSha: "baseSHA",
         headSha: "headSHA",
       },
@@ -171,8 +126,6 @@ describe("prepareReview", () => {
       "repo",
       1,
       {
-        action: "opened",
-        diffMode: "prompt",
         baseSha: "baseSHA",
         headSha: "headSHA",
       },
@@ -199,8 +152,6 @@ describe("prepareReview", () => {
       "repo",
       1,
       {
-        action: "opened",
-        diffMode: "prompt",
         baseSha: "baseSHA",
         headSha: "headSHA",
       },
@@ -230,8 +181,6 @@ describe("prepareReview", () => {
       "repo",
       1,
       {
-        action: "opened",
-        diffMode: "prompt",
         baseSha: "baseSHA",
         headSha: "headSHA",
       },
@@ -256,8 +205,6 @@ describe("prepareReview", () => {
       "repo",
       1,
       {
-        action: "opened",
-        diffMode: "prompt",
         baseSha: "baseSHA",
         headSha: "headSHA",
       },

@@ -472,7 +472,7 @@ describe("index.ts", () => {
     });
   });
 
-  it("uses ctx.payload.before for diff on synchronize event", async () => {
+  it("reviews the full PR diff on synchronize, not before...head", async () => {
     (github as any).context.payload.action = "synchronize";
     (github as any).context.payload.before = "beforeSHA";
     await loadIndex();
@@ -481,7 +481,7 @@ describe("index.ts", () => {
       "owner",
       "repo",
       expect.anything(),
-      "beforeSHA",
+      "baseSHA",
       "headSHA"
     );
   });

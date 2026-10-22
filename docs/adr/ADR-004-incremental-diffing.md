@@ -1,7 +1,9 @@
 # ADR-004: Incremental diffing on synchronize events
 
 ## Status
-Accepted
+Superseded (calibrain fork): every run now reviews the full PR diff.
+
+`before...head` stops being "the PR's new changes" as soon as the base branch is merged or rebased into the PR: it then holds the base's commits, and the PR's own changes are never reviewed. It also only covered the latest push when earlier runs had failed. Findings dedupe keeps already-posted, still-open findings from being repeated.
 
 ## Date
 2026-06-14

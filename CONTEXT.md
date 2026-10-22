@@ -52,8 +52,6 @@ still a successful execution; an unparseable-response fallback review is not.
 
 **OpenThread** — a previously-posted review comment that is still unresolved. Tracked by index so the LLM can mark them as fixed (`resolvedCommentIds`) and, when `dedupe` is enabled, told not to re-report them in `newComments`.
 
-**Incremental diff** — on synchronize events, the diff between the previous head and the new head, not the full PR diff.
-
 **ReviewCoverage** — the large-PR coverage report: whether the PR is large, how many files were reviewed, and which files were excluded (prompt mode) so the review can state explicit coverage instead of silently truncating the diff.
 
 **Skip decision** — a PR-level early return driven by the ignore inputs: title keyword match, author match, or label allow/deny policy. Skip decisions run before any GitHub/Jules API call, so skipped PRs never create a check run or session.

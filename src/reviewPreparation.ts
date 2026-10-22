@@ -6,7 +6,7 @@ import {
   extractChangedFilePaths,
 } from "./filtering.js";
 import { loadPerPathRules } from "./pathRules.js";
-import { DiffMode, OpenThread, PathRuleFile } from "./types.js";
+import { OpenThread, PathRuleFile } from "./types.js";
 
 export type ReviewPreparationConfig = {
   ignoredPaths?: string;
@@ -23,9 +23,6 @@ export type PreparedDiff = {
 };
 
 export type ReviewScope = {
-  action?: string;
-  before?: string;
-  diffMode: DiffMode;
   baseSha: string;
   headSha: string;
 };
@@ -38,19 +35,9 @@ export async function prepareReview(
   scope: ReviewScope,
   config: ReviewPreparationConfig
 ): Promise<PreparedDiff> {
-  const isIncremental =
-    scope.diffMode === "prompt" &&
-    scope.action === "synchronize" &&
-    Boolean(scope.before);
-  const diffBaseSha =
-    isIncremental && scope.before ? scope.before : scope.baseSha;
-  if (isIncremental) {
-    core.info(
-      `Synchronize event detected. Reviewing incremental changes from ${diffBaseSha} to ${scope.headSha}`
-    );
-  } else {
-    core.info(`Reviewing full PR diff from ${diffBaseSha} to ${scope.headSha}`);
-  }
+  // Always the whole PR diff, even on synchronize: before...head after a merge
+  // or rebase from the base branch holds the base's commits, not the PR's.
+  core.info(`Reviewing full PR diff from ${scope.baseSha} to ${scope.headSha}`);
 
   const [diff, rulesFromFile, openThreads] = await Promise.all([
     fetchDiff(
@@ -58,7 +45,7 @@ export async function prepareReview(
       owner,
       repo,
       { number: prNumber },
-      diffBaseSha,
+      scope.baseSha,
       scope.headSha
     ),
     config.rulesFilePath

@@ -1,6 +1,6 @@
 {
   "name": "jules-pr-reviewer",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "description": "GitHub Action that uses Google Jules to review pull requests and post review comments.",
   "scripts": {
